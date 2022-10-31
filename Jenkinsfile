@@ -7,7 +7,7 @@ pipeline {
 
     stages {
         
-        stage('BuildOne') {
+        stage('BuildOnee') {
             when {
                 branch 'develop'
             }
@@ -35,7 +35,9 @@ pipeline {
                         sh 'kubectl rollout status deployment -n web-go-desa web-go'
                     }
                 }
+            }
         }
+            
         stage('Build') {
             when {
                 branch 'main'
@@ -66,4 +68,3 @@ pipeline {
             }
         }
     }
-}
