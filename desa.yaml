@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web-go-desa
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-go
+  namespace: web-go-desa
+data:
+  FOO: "hola "
+  BAR: "mundo"
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: containergo-secrets
+  namespace: web-go
+type: Opaque
+data:
+  SUPERSECRETUSER: ZWxvbg==
+  SUPERSECRETPASS: bXVzaw==
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: containergo
+  namespace: web-go-desa
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-go
+  template:
+    metadata:
+      labels:
+        app: web-go
+    spec:
+      containers:
+      - name: web-go
+        image: docker.io/jmambrinventre/web-go
+        ports:
+        - containerPort: 8080
+        env:
+          - name: SUPERSECRETUSER
+            valueFrom:
+              secretKeyRef:
+                name: web-go
+                key: SUPERSECRETUSER
+          - name: SUPERSECRETPASS
+            valueFrom:
+              secretKeyRef:
+                name: web-go
+                key: SUPERSECRETPASS
+          - name: FOO
+            valueFrom:
+              configMapKeyRef:
+                name: web-go
+                key: FOO
+          - name: BAR
+            valueFrom:
+              configMapKeyRef:
+                name: web-go
+                key: BAR
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-go
+  namespace: web-go-desa
+spec:
+  type: ClusterIP
+  selector:
+    app: web-go
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-go
+  namespace: web-go-desa
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /desa
+        pathType: Prefix
+        backend:
+          service:
+            name: web-go
+            port:
+              number: 8080
