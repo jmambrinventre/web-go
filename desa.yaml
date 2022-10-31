@@ -45,7 +45,7 @@ spec:
     spec:
       containers:
       - name: web-go
-        image: docker.io/jmambrinventre/web-go
+        image: docker.io/jmambrinventre/web-go:develop
         ports:
         - containerPort: 8080
         env:
