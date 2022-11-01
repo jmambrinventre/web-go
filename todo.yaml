@@ -46,6 +46,7 @@ spec:
       containers:
       - name: web-go
         image: docker.io/jmambrinventre/web-go
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
